@@ -1,14 +1,36 @@
 /**
-  ******************************************************************************
-  * @file    : kfifo.c
-  * @brief   : kfifo
-  * @author  : zhengjy
-  * @version : v1.0 
-  ******************************************************************************
-  * @history : 
-  *
-  ******************************************************************************
-  */
+ *******************************************************************************
+ * @file        : kfifo.c
+ * @author      : ZJY
+ * @version     : V1.0
+ * @date        : 2024-07-16
+ * @brief       : Kernel FIFO implementation
+ * @attention   : xxx
+ *******************************************************************************
+ * @history     :
+ * | Version | Description |
+ * |---------|-------------|
+ * | V1.0    | Initial implementation |
+ *******************************************************************************
+ */
+/* Includes ------------------------------------------------------------------*/
+
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private define ------------------------------------------------------------*/
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+/* Exported variables  -------------------------------------------------------*/
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* Exported functions --------------------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+
 /* Includes ------------------------------------------------------------------*/
 #include "kfifo.h"
 #include "math/log2.h"
@@ -25,19 +47,21 @@
 
 /* Private function prototypes -----------------------------------------------*/
 static inline size_t kfifo_unused(kfifo_t *fifo);
-static void kfifo_copy_in(kfifo_t *fifo, const void  *src, 
-                          size_t len,  size_t    off);
-static void kfifo_copy_out(kfifo_t *fifo, void     *dst,
-		                   size_t len,  size_t off);
+static void kfifo_copy_in(kfifo_t *fifo, const void *src, size_t len, size_t off);
+static void kfifo_copy_out(kfifo_t *fifo, void *dst, size_t len, size_t off);
+
 /* Exported variables --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
+
 /**
-  * @brief  initialize the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  buffer: pointer to the storage buffer
-  * @param  size: size of the storage buffer(in bytes). Note: size must be a power of 2
-  * @retval 0: success
-  */
+ * @brief Initialize a FIFO buffer
+ * @param fifo   Pointer to the FIFO structure to initialize
+ * @param buffer Pointer to the storage buffer
+ * @param size   Size of the storage buffer in bytes (Note: size must be a power of 2)
+ * @param esize  Size of each element in bytes
+ * @retval 0       Success
+ * @retval -EINVAL Invalid parameters (esize is 0 or size is too small)
+ */
 int kfifo_init(kfifo_t *fifo, void *buffer, size_t size, size_t esize)
 {  
     /* Make sure that (size * esize) does not exceed the platform address space */
@@ -64,12 +88,12 @@ int kfifo_init(kfifo_t *fifo, void *buffer, size_t size, size_t esize)
 }
 
 /**
-  * @brief  put data into the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  buf : the data to be added
-  * @param  len : number of elements to be added
-  * @retval the number of copied elements.
-  */
+ * @brief Put data into the FIFO
+ * @param fifo Pointer to the FIFO structure
+ * @param buf  Pointer to the data to be added
+ * @param len  Number of elements to be added
+ * @return Number of elements actually copied
+ */
 size_t kfifo_in(kfifo_t *fifo, const void *buf, size_t len)
 {
 	size_t l;
@@ -84,6 +108,13 @@ size_t kfifo_in(kfifo_t *fifo, const void *buf, size_t len)
 	return len;
 }
 
+/**
+ * @brief Put data into the FIFO with interrupt protection
+ * @param fifo Pointer to the FIFO structure
+ * @param buf  Pointer to the data to be added
+ * @param len  Number of elements to be added
+ * @return Number of elements actually copied
+ */
 size_t kfifo_in_locked (kfifo_t *fifo, const void *buf, size_t len)
 {
     size_t ret;
@@ -95,12 +126,12 @@ size_t kfifo_in_locked (kfifo_t *fifo, const void *buf, size_t len)
 }
 
 /**
-  * @brief  peek data from the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  buf: pointer to the storage buffer
-  * @param  len: number of elements to peek
-  * @retval returns the numbers of elements copied.
-  */
+ * @brief Peek data from the FIFO without removing it
+ * @param fifo Pointer to the FIFO structure
+ * @param buf  Pointer to the storage buffer
+ * @param len  Number of elements to peek
+ * @return Number of elements actually copied
+ */
 size_t kfifo_out_peek(kfifo_t *fifo, void *buf, size_t len)
 {
 	size_t l;
@@ -114,12 +145,12 @@ size_t kfifo_out_peek(kfifo_t *fifo, void *buf, size_t len)
 }
 
 /**
-  * @brief  get data from the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  buf: pointer to the storage buffer
-  * @param  len: number of elements to get
-  * @retval returns the numbers of elements copied.
-  */
+ * @brief Get data from the FIFO
+ * @param fifo Pointer to the FIFO structure
+ * @param buf  Pointer to the storage buffer
+ * @param len  Number of elements to get
+ * @return Number of elements actually copied
+ */
 size_t kfifo_out(kfifo_t *fifo, void *buf, size_t len)
 {  
 	len = kfifo_out_peek(fifo, buf, len);
@@ -128,6 +159,13 @@ size_t kfifo_out(kfifo_t *fifo, void *buf, size_t len)
 	return len;
 }
 
+/**
+ * @brief Get data from the FIFO with interrupt protection
+ * @param fifo Pointer to the FIFO structure
+ * @param buf  Pointer to the storage buffer
+ * @param len  Number of elements to get
+ * @return Number of elements actually copied
+ */
 size_t kfifo_out_locked(kfifo_t *fifo, void *buf, size_t len)
 {
     size_t ret;
@@ -139,14 +177,13 @@ size_t kfifo_out_locked(kfifo_t *fifo, void *buf, size_t len)
 }
 
 /**
- * @brief  Get the length of the linear space that can be read
- * @param  fifo: Address of the fifo to be used.
- * @param  tail: Return the starting position that can be read in the linear space.
- * @param  n   : The number of data requested to be read.
- * @retval It returns the available count till the end of data 
- *         or till the end of the buffer.
- * @note   That with only one concurrent reader and one concurrent writer,
- *         you don't need extra locking to use this function.
+ * @brief Get the length of the linear space that can be read
+ * @param fifo Pointer to the FIFO structure
+ * @param tail Pointer to return the starting position that can be read in the linear space
+ * @param n    Number of elements requested to be read
+ * @return Available count till the end of data or till the end of the buffer
+ * @note With only one concurrent reader and one concurrent writer,
+ *       you don't need extra locking to use this function.
  */
 size_t kfifo_out_linear(kfifo_t *fifo, size_t *tail, size_t n)
 {
@@ -159,6 +196,13 @@ size_t kfifo_out_linear(kfifo_t *fifo, size_t *tail, size_t n)
     return min3(n, fifo->in - fifo->out, size - off);
 }
 
+/**
+ * @brief Get the length of the linear space that can be read with interrupt protection
+ * @param fifo Pointer to the FIFO structure
+ * @param tail Pointer to return the starting position that can be read in the linear space
+ * @param n    Number of elements requested to be read
+ * @return Available count till the end of data or till the end of the buffer
+ */
 size_t kfifo_out_linear_locked(kfifo_t *fifo, size_t *tail, size_t n)
 {
     size_t ret;
@@ -171,25 +215,25 @@ size_t kfifo_out_linear_locked(kfifo_t *fifo, size_t *tail, size_t n)
 
 /* Private functions ---------------------------------------------------------*/
 /**
-  * @brief  get the unused space in the fifo
-  * @param  fifo: address of the fifo to be used
-  * @retval the unused space in the fifo
-  */
+ * @brief Get the unused space in the FIFO
+ * @param fifo Pointer to the FIFO structure
+ * @return Number of unused elements in the FIFO
+ */
 static inline size_t kfifo_unused(kfifo_t *fifo)
 {
     return (fifo->mask + 1) - (fifo->in - fifo->out);
 }
 
 /**
-  * @brief  copy data to the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  src: pointer to the source buffer
-  * @param  len: number of elements to be copied
-  * @param  off: offset to the destination buffer
-  * @retval none
-  */
-static void kfifo_copy_in(kfifo_t     *fifo, const void  *src, 
-                          size_t len,  size_t off)
+ * @brief Copy data into the FIFO buffer
+ * @param fifo Pointer to the FIFO structure
+ * @param src  Pointer to the source buffer
+ * @param len  Number of elements to be copied
+ * @param off  Offset in the destination buffer
+ * @details This function handles circular buffer wraparound and ensures
+ *          data consistency with memory barriers.
+ */
+static void kfifo_copy_in(kfifo_t *fifo, const void *src, size_t len, size_t off)
 {
 	size_t size = fifo->mask + 1;
 	size_t esize = fifo->esize;
@@ -213,15 +257,15 @@ static void kfifo_copy_in(kfifo_t     *fifo, const void  *src,
 }
 
 /**
-  * @brief  copy data from the fifo
-  * @param  fifo: address of the fifo to be used
-  * @param  dst: pointer to the destination buffer
-  * @param  len: number of elements to be copied
-  * @param  off: offset to the source buffer
-  * @retval none
-  */
-static void kfifo_copy_out(kfifo_t     *fifo, void        *dst,
-		                   size_t len,  size_t off)
+ * @brief Copy data from the FIFO buffer
+ * @param fifo Pointer to the FIFO structure
+ * @param dst  Pointer to the destination buffer
+ * @param len  Number of elements to be copied
+ * @param off  Offset in the source buffer
+ * @details This function handles circular buffer wraparound and ensures
+ *          data consistency with memory barriers.
+ */
+static void kfifo_copy_out(kfifo_t *fifo, void *dst, size_t len, size_t off)
 {
 	size_t size = fifo->mask + 1;
 	size_t esize = fifo->esize;
