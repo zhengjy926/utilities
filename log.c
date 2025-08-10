@@ -120,7 +120,7 @@ void log_output(const char *format, ...)
     va_end(args);
     
     if (len < 0) {
-        len = 0;        /* Handle encoding error */
+        return;
     }
 
     if (len >= sizeof(buffer)) {
