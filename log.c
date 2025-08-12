@@ -130,15 +130,15 @@ void log_output(const char *format, ...)
         len = sizeof(buffer) - 1;
     }
     
+#if USING_RTOS
+    UNLOCK();
+#endif
     // 调用所有已注册且启用的处理器
     for (uint8_t i = 0; i < handler_count; i++) {
         if (log_handlers[i].enabled) {
             log_handlers[i].output(buffer, len);
         }
     }
-#if USING_RTOS
-    UNLOCK();
-#endif
 }
 /* Private functions ---------------------------------------------------------*/
 

@@ -103,8 +103,6 @@ size_t kfifo_in(kfifo_t *fifo, const void *buf, size_t len)
     }
     
 	size_t unused = kfifo_unused(fifo);
-    
-	unused = kfifo_unused(fifo);
 	if (len > unused)
 		len = unused;
     
@@ -144,19 +142,16 @@ size_t kfifo_in_locked (kfifo_t *fifo, const void *buf, size_t len)
  */
 size_t kfifo_out_peek(kfifo_t *fifo, void *buf, size_t len)
 {
-    if (!fifo || !buf || len == 0) {
-        return 0;
-    }
+    if (!fifo || !buf || len == 0)
+        return 0; 
     
     size_t used = fifo->in - fifo->out;
-    if (len > used) {
+    
+    if (len > used)
         len = used;
-    } else if(len == 0) {
-        return 0;
-    }
-
-	kfifo_copy_out(fifo, buf, len, fifo->out);
-	return len;
+    
+    kfifo_copy_out(fifo, buf, len, fifo->out);
+    return len;
 }
 
 /**
