@@ -1,28 +1,6 @@
-/**
-  ******************************************************************************
-  * @file        : xxx.h
-  * @author      : ZJY
-  * @version     : V1.0
-  * @date        : 20xx-xx-xx
-  * @brief       : 
-  * @attention   : None
-  ******************************************************************************
-  * @history     :
-  *         V1.0 : 1.xxx
-  ******************************************************************************
-  */
-#ifndef __SYS_DEF_H__
-#define __SYS_DEF_H__
+#ifndef _ERRNO_BASE_H
+#define _ERRNO_BASE_H
 
-#ifdef __cplusplus
- extern "C" {
-#endif /* __cplusplus */
-
-/* Includes ------------------------------------------------------------------*/
-#include "sys_config.h"
-#include "types.h"
-
-/* Exported define -----------------------------------------------------------*/
 /** @defgroup error code definitions
   * @{
   */
@@ -67,22 +45,5 @@
 /**
   * @}
   */
-/* Exported typedef ----------------------------------------------------------*/
 
-/* Exported macro ------------------------------------------------------------*/
-/**
- * @brief return the member address of ptr, if the type of ptr is the struct type.
- */
-#define container_of(ptr, type, member) \
-    ((type *)((char *)(ptr) - offsetof(type, member)))
-
-/* Exported variable prototypes ----------------------------------------------*/
-
-/* Exported function prototypes ----------------------------------------------*/
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* __SYS_DEF_H__ */
-
+#endif

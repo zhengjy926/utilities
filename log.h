@@ -19,7 +19,10 @@
 #endif /* __cplusplus */
 
 /* Includes ------------------------------------------------------------------*/
-#include "sys_def.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdarg.h>
 #include <assert.h>
 
 /* Exported define -----------------------------------------------------------*/
@@ -43,7 +46,6 @@
     #define LOG_MAX_HANDLERS            4
 #endif
 
-/*  */
 #ifndef LOG_BUF_SIZE
     #define LOG_BUF_SIZE                (1024)
 #endif

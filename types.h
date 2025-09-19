@@ -20,9 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdarg.h>
+
 /* Exported define -----------------------------------------------------------*/
 
 /* Exported typedef ----------------------------------------------------------*/
@@ -68,6 +66,12 @@ struct hlist_node {
         assert(!__builtin_types_compatible_p(typeof(arr), typeof(&(arr)[0]))),  \
         (sizeof(arr) / sizeof((arr)[0]))                                        \
     )
+        
+/**
+ * @brief return the member address of ptr, if the type of ptr is the struct type.
+ */
+#define container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - offsetof(type, member)))
 /* Exported variable prototypes ----------------------------------------------*/
 
 /* Exported function prototypes ----------------------------------------------*/

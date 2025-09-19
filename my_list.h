@@ -12,7 +12,7 @@
 #ifndef __MY_LIST_H
 #define __MY_LIST_H
 
-#include "sys_def.h"
+#include "types.h"
 
 /**
  * @brief  Define a LIST_HEAD macro for convenience

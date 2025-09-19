@@ -20,7 +20,9 @@
 #endif /* __cplusplus */
 
 /* Includes ------------------------------------------------------------------*/
-#include "sys_def.h"
+#include <stddef.h>
+#include <types.h>
+
 /* Exported define -----------------------------------------------------------*/
 
 /* Exported typedef ----------------------------------------------------------*/
@@ -31,11 +33,11 @@
  */
 typedef struct
 {
-	volatile uint32_t in;    /**< Input index */
-	volatile uint32_t out;   /**< Output index */
-	size_t            mask;  /**< Size mask (size - 1) */
-	size_t            esize; /**< Element size in bytes */
-	void              *data; /**< Pointer to buffer data */
+	volatile unsigned int in;    /**< Input index */
+	volatile unsigned int out;   /**< Output index */
+	unsigned int          mask;  /**< Size mask (size - 1) */
+	unsigned int          esize; /**< Element size in bytes */
+	void                  *data; /**< Pointer to buffer data */
 }kfifo_t;
 
 /* Exported macro ------------------------------------------------------------*/
@@ -152,14 +154,14 @@ typedef struct
 /* Exported variable prototypes ----------------------------------------------*/
 
 /* Exported function prototypes ----------------------------------------------*/
-int    kfifo_init             (kfifo_t *fifo, void *buffer, size_t size, size_t esize);
-size_t kfifo_in               (kfifo_t *fifo, const void *buf, size_t len);
-size_t kfifo_in_locked        (kfifo_t *fifo, const void *buf, size_t len);
-size_t kfifo_out              (kfifo_t *fifo, void *buf, size_t len);
-size_t kfifo_out_locked       (kfifo_t *fifo, void *buf, size_t len);
-size_t kfifo_out_peek         (kfifo_t *fifo, void *buf, size_t len);
-size_t kfifo_out_linear       (kfifo_t *fifo, size_t *tail, size_t n);
-size_t kfifo_out_linear_locked(kfifo_t *fifo, size_t *tail, size_t n);
+int          kfifo_init             (kfifo_t *fifo, void *buffer, unsigned int size, size_t esize);
+unsigned int kfifo_in               (kfifo_t *fifo, const void *buf, unsigned int len);
+unsigned int kfifo_in_locked        (kfifo_t *fifo, const void *buf, unsigned int len);
+unsigned int kfifo_out              (kfifo_t *fifo, void *buf, unsigned int len);
+unsigned int kfifo_out_locked       (kfifo_t *fifo, void *buf, unsigned int len);
+unsigned int kfifo_out_peek         (kfifo_t *fifo, void *buf, unsigned int len);
+unsigned int kfifo_out_linear       (kfifo_t *fifo, unsigned int *tail, unsigned int n);
+unsigned int kfifo_out_linear_locked(kfifo_t *fifo, unsigned int *tail, unsigned int n);
 
 #ifdef __cplusplus
 }
