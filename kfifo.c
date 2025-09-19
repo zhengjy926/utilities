@@ -65,7 +65,15 @@ static void kfifo_copy_out(kfifo_t *fifo, void *dst, unsigned int len, size_t of
  */
 int kfifo_init(kfifo_t *fifo, void *buffer, unsigned int size, size_t esize)
 {  
-	size /= esize;
+    if (!fifo || !buffer || size == 0 || esize == 0) {
+        return -EINVAL;
+    }
+
+    /* convert total bytes -> number of elements */
+    size_t elems = size / esize;
+    if (elems < 2) {
+        return -EINVAL;
+    }
 
 	if (!is_power_of_2(size))
 		size = rounddown_pow_of_two(size);
@@ -74,14 +82,19 @@ int kfifo_init(kfifo_t *fifo, void *buffer, unsigned int size, size_t esize)
 	fifo->out = 0;
 	fifo->esize = esize;
 	fifo->data = buffer;
+    if (!is_power_of_2((unsigned int)elems)) {
+        elems = rounddown_pow_of_two((unsigned int)elems);
+        if (elems < 2)
+            return -EINVAL;
+    }
 
-	if (size < 2) {
-		fifo->mask = 0;
-		return -EINVAL;
-	}
-	fifo->mask = size - 1;
+    fifo->in = 0;
+    fifo->out = 0;
+    fifo->esize = esize;
+    fifo->data = buffer;
+    fifo->mask = elems - 1;
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -95,10 +108,14 @@ unsigned int kfifo_in(kfifo_t *fifo, const void *buf, unsigned int len)
 {
 	unsigned int l;
 
-	l = kfifo_unused(fifo);
-	if (len > l)
-		len = l;
-
+	size_t unused = kfifo_unused(fifo);
+	if (len > unused)
+		len = unused;
+    
+    if (len == 0) {
+        return 0;
+    }
+    
 	kfifo_copy_in(fifo, buf, len, fifo->in);
 	fifo->in += len;
 	return len;
@@ -168,10 +185,17 @@ unsigned int kfifo_out_linear(kfifo_t *fifo, unsigned int *tail, size_t n)
  * @return Number of elements actually copied
  */
 unsigned int kfifo_out(kfifo_t *fifo, void *buf, unsigned int len)
-{  
-	len = kfifo_out_peek(fifo, buf, len);
-    fifo->out += len;
+{
+    if (!fifo || !buf || len == 0) {
+        return 0;
+    }
     
+	len = kfifo_out_peek(fifo, buf, len);
+    if (len == 0) {
+        return 0;
+    }
+    
+    fifo->out += len;
 	return len;
 }
 
