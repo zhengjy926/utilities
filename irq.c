@@ -13,7 +13,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "irq.h"
-#include "../utilities/atomic.h"
+
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -34,7 +34,7 @@ volatile uint32_t interrupt_nest = 0;
  *
  * @see interrupt_leave
  */
-__WEAK void interrupt_enter(void)
+void interrupt_enter(void)
 {
     atomic_add(&(interrupt_nest), 1);
 }
@@ -46,7 +46,7 @@ __WEAK void interrupt_enter(void)
  *
  * @see interrupt_enter
  */
-__WEAK void interrupt_leave(void)
+void interrupt_leave(void)
 {
     atomic_sub(&(interrupt_nest), 1);
 }
@@ -59,7 +59,7 @@ __WEAK void interrupt_leave(void)
  *
  * @return the number of nested interrupts.
  */
-__WEAK uint8_t interrupt_get_nest(void)
+uint8_t interrupt_get_nest(void)
 {
     uint8_t ret;
     base_t level;

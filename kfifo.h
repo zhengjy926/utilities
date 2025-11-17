@@ -12,8 +12,8 @@
  * |---------|-------------|
  * | V1.0    | Initial implementation |
  */
-#ifndef __KFIFO_H__
-#define __KFIFO_H__
+#ifndef KFIFO_H
+#define KFIFO_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -21,9 +21,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stddef.h>
-#include <types.h>
-
-/* Exported define -----------------------------------------------------------*/
+#include <stdint.h>
 
 /* Exported typedef ----------------------------------------------------------*/
 /**
@@ -33,35 +31,45 @@
  */
 typedef struct
 {
-	volatile unsigned int in;    /**< Input index */
-	volatile unsigned int out;   /**< Output index */
-	unsigned int          mask;  /**< Size mask (size - 1) */
-	unsigned int          esize; /**< Element size in bytes */
-	void                  *data; /**< Pointer to buffer data */
-}kfifo_t;
+    volatile unsigned int in;    /**< Input index */
+    volatile unsigned int out;   /**< Output index */
+    unsigned int          mask;  /**< Size mask (size - 1) */
+    unsigned int          esize; /**< Element size in bytes */
+    void                 *data;  /**< Pointer to buffer data */
+} kfifo_t;
 
-/* Exported macro ------------------------------------------------------------*/
+/* Inline helpers (replace non-MISRA macros) ---------------------------------*/
+
 /**
  * @brief Check if the FIFO is initialized
  * @param fifo Pointer to the FIFO structure to check
- * @return true if FIFO is initialized, false otherwise
- * @note Assumes the FIFO was zero-initialized before use
+ * @return 1U if FIFO is initialized, 0U otherwise
+ * @note  Assumes the FIFO was zero-initialized before use
  */
-#define kfifo_initialized(fifo) ((fifo)->mask)
+static inline uint8_t kfifo_initialized(const kfifo_t *fifo)
+{
+    return (fifo->mask != 0U) ? 1U : 0U;
+}
 
 /**
  * @brief Get the element size of the FIFO
  * @param fifo Pointer to the FIFO structure
  * @return Size of each element in bytes
  */
-#define kfifo_esize(fifo)	((fifo)->esize)
+static inline unsigned int kfifo_esize(const kfifo_t *fifo)
+{
+    return fifo->esize;
+}
 
 /**
  * @brief Get the total size of the FIFO in elements
  * @param fifo Pointer to the FIFO structure
  * @return Total number of elements the FIFO can hold
  */
-#define kfifo_size(fifo)	((fifo)->mask + 1)
+static inline unsigned int kfifo_size(const kfifo_t *fifo)
+{
+    return fifo->mask + 1U;
+}
 
 /**
  * @brief Reset the FIFO buffer, removing all content
@@ -70,103 +78,117 @@ typedef struct
  *          FIFO is exclusively locked or when it is secured that no other
  *          thread is accessing the FIFO.
  */
-#define kfifo_reset(fifo) \
-(void)({ \
-	typeof((fifo) + 1) __tmp = (fifo); \
-	__tmp->in = __tmp->out = 0; \
-})
+static inline void kfifo_reset(kfifo_t *fifo)
+{
+    fifo->in  = 0U;
+    fifo->out = 0U;
+}
 
 /**
  * @brief Skip all FIFO content by moving output pointer to input pointer
  * @param fifo Pointer to the FIFO structure
- * @note The usage of kfifo_reset_out() is safe until it will be only called
- *       from the reader thread and there is only one concurrent reader.
- *       Otherwise it is dangerous and must be handled in the same way as
- *       kfifo_reset().
+ * @note  Safe only when called from the reader thread with a single reader.
  */
-#define kfifo_reset_out(fifo) \
-(void)({ \
-	typeof((fifo) + 1) __tmp = (fifo); \
-	__tmp->out = __tmp->in; \
-})
+static inline void kfifo_reset_out(kfifo_t *fifo)
+{
+    fifo->out = fifo->in;
+}
 
 /**
  * @brief Get the number of used elements in the FIFO
  * @param fifo Pointer to the FIFO structure
  * @return Number of elements currently stored in the FIFO
  */
-#define kfifo_len(fifo) \
-({ \
-	typeof((fifo) + 1) __tmpl = (fifo); \
-	__tmpl->in - __tmpl->out; \
-})
+static inline unsigned int kfifo_len(const kfifo_t *fifo)
+{
+    return fifo->in - fifo->out;
+}
 
 /**
  * @brief Check if the FIFO is empty
  * @param fifo Pointer to the FIFO structure
- * @return true if FIFO is empty, false otherwise
+ * @return 1U if FIFO is empty, 0U otherwise
  */
-#define	kfifo_is_empty(fifo) \
-({ \
-	typeof((fifo) + 1) __tmpq = (fifo); \
-	__tmpq->in == __tmpq->out; \
-})
+static inline uint8_t kfifo_is_empty(const kfifo_t *fifo)
+{
+    return (fifo->in == fifo->out) ? 1U : 0U;
+}
 
 /**
  * @brief Check if the FIFO is full
  * @param fifo Pointer to the FIFO structure
- * @return true if FIFO is full, false otherwise
+ * @return 1U if FIFO is full, 0U otherwise
  */
-#define	kfifo_is_full(fifo) \
-({ \
-	typeof((fifo) + 1) __tmpq = (fifo); \
-	kfifo_len(__tmpq) > __tmpq->mask; \
-})
+static inline uint8_t kfifo_is_full(const kfifo_t *fifo)
+{
+    return (kfifo_len(fifo) > fifo->mask) ? 1U : 0U;
+}
 
 /**
  * @brief Get the number of available (unused) elements in the FIFO
  * @param fifo Pointer to the FIFO structure
  * @return Number of elements that can still be added to the FIFO
  */
-#define	kfifo_avail(fifo) \
-({ \
-	typeof((fifo) + 1) __tmpq = (fifo); \
-	unsigned int __avail = kfifo_size(__tmpq) - kfifo_len(__tmpq); \
-	__avail; \
-}) \
+static inline unsigned int kfifo_avail(const kfifo_t *fifo)
+{
+    return kfifo_size(fifo) - kfifo_len(fifo);
+}
 
 /**
  * @brief Skip a specified number of output elements
- * @param fifo Pointer to the FIFO structure
+ * @param fifo  Pointer to the FIFO structure
  * @param count Number of elements to skip
  */
-#define	kfifo_skip_count(fifo, count) do { \
-	typeof((fifo) + 1) __tmp = (fifo); \
-    __tmp->out += (count); \
-} while(0)
+static inline void kfifo_skip_count(kfifo_t *fifo, unsigned int count)
+{
+    fifo->out += count;
+}
 
 /**
  * @brief Skip one output element
  * @param fifo Pointer to the FIFO structure
  */
-#define	kfifo_skip(fifo)	kfifo_skip_count(fifo, 1)
-
-/* Exported variable prototypes ----------------------------------------------*/
+static inline void kfifo_skip(kfifo_t *fifo)
+{
+    kfifo_skip_count(fifo, 1U);
+}
 
 /* Exported function prototypes ----------------------------------------------*/
-int          kfifo_init             (kfifo_t *fifo, void *buffer, unsigned int size, size_t esize);
-unsigned int kfifo_in               (kfifo_t *fifo, const void *buf, unsigned int len);
-unsigned int kfifo_in_locked        (kfifo_t *fifo, const void *buf, unsigned int len);
-unsigned int kfifo_out              (kfifo_t *fifo, void *buf, unsigned int len);
-unsigned int kfifo_out_locked       (kfifo_t *fifo, void *buf, unsigned int len);
-unsigned int kfifo_out_peek         (kfifo_t *fifo, void *buf, unsigned int len);
-unsigned int kfifo_out_linear       (kfifo_t *fifo, unsigned int *tail, unsigned int n);
-unsigned int kfifo_out_linear_locked(kfifo_t *fifo, unsigned int *tail, unsigned int n);
+int          kfifo_init             (kfifo_t *fifo,
+                                     void *buffer,
+                                     unsigned int size,
+                                     unsigned int esize);
+                                     
+unsigned int kfifo_in               (kfifo_t *fifo,
+                                     const void *buf,
+                                     unsigned int len);
+                                     
+unsigned int kfifo_in_locked        (kfifo_t *fifo,
+                                     const void *buf,
+                                     unsigned int len);
+                                     
+unsigned int kfifo_out              (kfifo_t *fifo,
+                                     void *buf,
+                                     unsigned int len);
+                                     
+unsigned int kfifo_out_locked       (kfifo_t *fifo,
+                                     void *buf,
+                                     unsigned int len);
+                                     
+unsigned int kfifo_out_peek         (kfifo_t *fifo,
+                                     void *buf,
+                                     unsigned int len);
+                                     
+unsigned int kfifo_out_linear       (kfifo_t *fifo,
+                                     unsigned int *tail,
+                                     unsigned int n);
+                                     
+unsigned int kfifo_out_linear_locked(kfifo_t *fifo,
+                                     unsigned int *tail,
+                                     unsigned int n);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __KFIFO_H__ */
-
-
+#endif /* KFIFO_H */

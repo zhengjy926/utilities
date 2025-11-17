@@ -10,9 +10,11 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stimer.h"
+#include "errno-base.h"
 #include <string.h>
 #include <stdlib.h>
 #include "sort_algo.h"
+#include "types.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

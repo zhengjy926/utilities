@@ -12,7 +12,39 @@
 #ifndef __MY_LIST_H
 #define __MY_LIST_H
 
+#include <stdint.h>
+#include <stddef.h>
 #include "types.h"
+
+/**
+ * @brief  Double list structure
+ */
+struct list_node {
+    struct list_node *next, *prev;
+};
+typedef struct list_node list_t;
+
+/**
+ * @brief  Single List structure
+ */
+struct slist_node {
+    struct slist_node *next;
+};
+typedef struct slist_node slist_t;
+
+/**
+ * @brief  Single List structure
+ */
+struct hlist_head {
+	struct hlist_node *first;
+};
+
+/**
+ * @brief  Single List structure
+ */
+struct hlist_node {
+	struct hlist_node *next, **pprev;
+};
 
 /**
  * @brief  Define a LIST_HEAD macro for convenience

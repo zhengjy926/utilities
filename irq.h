@@ -19,7 +19,8 @@
 #endif /* __cplusplus */
 
 /* Includes ------------------------------------------------------------------*/
-#include "sys_def.h"
+#include <stdint.h>
+
 /* Exported define -----------------------------------------------------------*/
 
 /* Exported typedef ----------------------------------------------------------*/
@@ -29,9 +30,10 @@
 /* Exported variable prototypes ----------------------------------------------*/
 
 /* Exported function prototypes ----------------------------------------------*/
-__WEAK void     interrupt_enter(void);
-__WEAK void     interrupt_leave(void);
-__WEAK uint8_t  interrupt_get_nest(void);
+void     interrupt_enter(void);
+void     interrupt_leave(void);
+uint8_t  interrupt_get_nest(void);
+
 
 #ifdef __cplusplus
 }

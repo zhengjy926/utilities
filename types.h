@@ -29,36 +29,7 @@ typedef uint32_t                ubase_t; /**< Nbit unsigned CPU related data typ
 typedef  int32_t                ssize_t; /**< The size t type that may return a negative value */
 
 typedef ubase_t                 atomic_t;
-
-/**
- * @brief  Double list structure
- */
-struct list_node {
-    struct list_node *next, *prev;
-};
-typedef struct list_node list_t;
-
-/**
- * @brief  Single List structure
- */
-struct slist_node {
-    struct slist_node *next;
-};
-typedef struct slist_node slist_t;
-
-/**
- * @brief  Single List structure
- */
-struct hlist_head {
-	struct hlist_node *first;
-};
-
-/**
- * @brief  Single List structure
- */
-struct hlist_node {
-	struct hlist_node *next, **pprev;
-};
+typedef int32_t                 off_t;
 
 /* Exported macro ------------------------------------------------------------*/
 #define ARRAY_SIZE(arr)                                                         \

@@ -40,8 +40,9 @@
 #define	ERANGE		            34	/**< Math result not representable */
 #define ETIMEOUT                35  /**< Time out */
 #define ENOSYS                  36  /**< Invalid system call number */
-#define ENOTSUPP                37  
+#define ENOTSUPP                37  /**< Operation not supported */
 #define	ENAMETOOLONG	        38	/**< File name too long */
+#define EUCLEAN                 117 /**< Structure needs cleaning (ECC correctable but over threshold) */
 /**
   * @}
   */
