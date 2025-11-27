@@ -15,7 +15,6 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-#if CRC16_USE_8005
 /**
  * @brief CRC table for the CRC-16. The poly is 0x8005 (x^16 + x^15 + x^2 + 1)
  *        input data reversed : ture,
@@ -55,9 +54,7 @@ static uint16_t const crc16_8005_table[256] = {
 	0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
 	0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
 };
-#endif
 
-#if CRC16_USE_1021
 /**
  * @brief CRC table for the CRC-16. The poly is 0x1021 (x^16 + x^12 + x^5 + 1),
  *        input data reversed : ture,
@@ -137,11 +134,11 @@ static uint16_t const crc16_1021_table[256] = {
 	0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8, 
 	0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
 };
-#endif
+
 /* Private function prototypes -----------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
-#if CRC16_USE_8005
+
 /**
  * @brief Using table lookup method to quickly calculate crc values
  */
@@ -171,9 +168,7 @@ uint16_t crc16_8005(uint16_t      init_value, uint16_t xor_out_value,
     
 	return crc;
 }
-#endif
 
-#if CRC16_USE_1021
 /**
  * @brief Using table lookup method to quickly calculate crc values
  */
@@ -216,6 +211,6 @@ uint16_t crc16_1021(uint16_t init_value, uint16_t xor_out_value, bool reversed,
     
 	return crc;
 }
-#endif
+
 /* Private functions ---------------------------------------------------------*/
 /**************************** End of file *************************************/
