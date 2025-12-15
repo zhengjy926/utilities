@@ -4,7 +4,7 @@
   * @author      : ZJY
   * @version     : V1.0
   * @date        : 2025-06-01
-  * @brief       : 
+  * @brief       :
   * @attention   : None
   ******************************************************************************
   * @history     :
@@ -80,7 +80,7 @@ bool log_register_handler(const char *name, log_output_fn output)
     s_handlers[s_handler_count].enabled = true;
     s_handler_count++;
     LOG_UNLOCK();
-    
+
     return true;
 }
 
@@ -125,7 +125,7 @@ void log_voutput(const char *format, va_list ap)
 {
     if (!format)
         return;
-    
+
     if (!any_handler_enabled())
         return;
 
@@ -144,8 +144,8 @@ void log_voutput(const char *format, va_list ap)
 
     /* 主体格式化 */
     int rem = (int)((off < LOG_BUF_SIZE) ? (LOG_BUF_SIZE - off) : 0);
-    if (rem <= 0) { 
-        buf[LOG_BUF_SIZE - 1] = '\0'; 
+    if (rem <= 0) {
+        buf[LOG_BUF_SIZE - 1] = '\0';
     } else {
         int m = vsnprintf(&buf[off], (size_t)rem, format, ap);
         if (m < 0) {
@@ -192,7 +192,7 @@ void log_voutput(const char *format, va_list ap)
 void log_output(const char *format, ...)
 {
     (void)s_runtime_global_lvl;
-    
+
     va_list ap;
     va_start(ap, format);
     log_voutput(format, ap);

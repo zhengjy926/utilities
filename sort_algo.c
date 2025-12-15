@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
   * @file        : sort_algo.c
-  * @author      : 
+  * @author      :
   * @version     : V1.0
-  * @date        : 
+  * @date        :
   * @brief       : Generic sorting algorithms for various data structures
   * @attention   : None
   ******************************************************************************
@@ -35,40 +35,40 @@ static void merge_sort_internal(void *base, void *temp, size_t lo, size_t hi, si
  * @param  new_node: Node to insert
  * @param  compare_func: Function to compare nodes
  * @retval None
- * 
+ *
  * This function uses insertion sort algorithm which is efficient for small lists
  * and when elements are inserted one by one. Time complexity: O(n)
  */
 void sorted_insert_list(list_t *head, list_t *new_node, sort_compare_func_t compare_func)
 {
     list_t *current;
-    
+
     /* If list is empty or node should be inserted before the head */
     if (list_empty(head) || compare_func((const void *)new_node, (const void *)head->next) < 0) {
         list_add(new_node, head);
         return;
     }
-    
+
     /* Find the right position to insert */
     list_for_each(current, head) {
         /* Skip the head node */
         if (current == head) {  /* Replace list_is_head with direct comparison */
             continue;
         }
-        
+
         /* If we've reached the end of the list */
         if (current->next == head) {
             list_add(new_node, current);
             return;
         }
-        
+
         /* If new_node should be inserted before the next node */
         if (compare_func((const void *)new_node, (const void *)current->next) < 0) {
             list_add(new_node, current);
             return;
         }
     }
-    
+
     /* If we reach here, add to the end of the list */
     list_add_tail(new_node, head);
 }
@@ -84,9 +84,9 @@ static void swap_bytes(void *a, void *b, size_t size)
 {
     uint8_t *pa = (uint8_t *)a;
     uint8_t *pb = (uint8_t *)b;
-    
+
     if (a == b) return;
-    
+
     if (size <= STACK_BUFFER_SIZE) {
         /* Use static buffer for small swaps */
         memcpy(temp_buffer, pa, size);
@@ -95,7 +95,7 @@ static void swap_bytes(void *a, void *b, size_t size)
     } else {
         /* For larger elements, use word-sized swaps when possible */
         size_t i = 0;
-        
+
         /* Align to word boundary if possible */
         while (i < size && ((uintptr_t)(pa + i) & (sizeof(size_t) - 1))) {
             uint8_t t = pa[i];
@@ -103,7 +103,7 @@ static void swap_bytes(void *a, void *b, size_t size)
             pb[i] = t;
             i++;
         }
-        
+
         /* Use word-sized swaps for bulk of data */
         while (i + sizeof(size_t) <= size) {
             size_t t = *(size_t *)(pa + i);
@@ -111,7 +111,7 @@ static void swap_bytes(void *a, void *b, size_t size)
             *(size_t *)(pb + i) = t;
             i += sizeof(size_t);
         }
-        
+
         /* Handle remaining bytes */
         while (i < size) {
             uint8_t t = pa[i];
@@ -129,7 +129,7 @@ static void swap_bytes(void *a, void *b, size_t size)
  * @param  size: Size of each element
  * @param  compare_func: Function to compare elements
  * @retval None
- * 
+ *
  * Insertion sort is efficient for small arrays or nearly sorted arrays.
  * Time complexity: O(n²) in worst case, O(n) in best case
  */
@@ -137,15 +137,15 @@ void insertion_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t c
 {
     uint8_t *p = (uint8_t *)base;
     size_t i, j;
-    
+
     /* Check for empty or single-element array */
     if (nmemb <= 1) return;
-    
+
     for (i = 1; i < nmemb; i++) {
         for (j = i; j > 0; j--) {
             uint8_t *current = p + (j * size);
             uint8_t *prev = p + ((j - 1) * size);
-            
+
             if (compare_func(prev, current) > 0) {
                 swap_bytes(prev, current, size);
             } else {
@@ -163,7 +163,7 @@ void insertion_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t c
  * @param  size: Size of each element
  * @param  compare_func: Function to compare elements
  * @retval None
- * 
+ *
  * Quick sort is efficient for large arrays.
  * Time complexity: O(n log n) on average, O(n²) in worst case
  */
@@ -171,7 +171,7 @@ void quick_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t compa
 {
     /* Check for empty or single-element array */
     if (nmemb <= 1) return;
-    
+
     quick_sort_internal(base, 0, nmemb - 1, size, compare_func);
 }
 
@@ -192,27 +192,27 @@ static void quick_sort_internal(void *base, size_t lo, size_t hi, size_t size, s
             insertion_sort((uint8_t *)base + lo * size, hi - lo + 1, size, compare_func);
             return;
         }
-        
+
         uint8_t *p = (uint8_t *)base;
-        
+
         /* Choose median-of-three as pivot */
         size_t mid = lo + (hi - lo) / 2;
         uint8_t *pl = p + lo * size;
         uint8_t *pm = p + mid * size;
         uint8_t *ph = p + hi * size;
-        
+
         if (compare_func(pl, pm) > 0) swap_bytes(pl, pm, size);
         if (compare_func(pm, ph) > 0) swap_bytes(pm, ph, size);
         if (compare_func(pl, pm) > 0) swap_bytes(pl, pm, size);
-        
+
         /* Move pivot to end */
         swap_bytes(pm, ph, size);
         uint8_t *pivot = ph;
-        
+
         /* Partition */
         size_t i = lo;
         size_t j;
-        
+
         for (j = lo; j < hi; j++) {
             uint8_t *element = p + (j * size);
             if (compare_func(element, pivot) <= 0) {
@@ -221,10 +221,10 @@ static void quick_sort_internal(void *base, size_t lo, size_t hi, size_t size, s
                 i++;
             }
         }
-        
+
         uint8_t *current = p + (i * size);
         swap_bytes(current, pivot, size);
-        
+
         /* Recursively sort smaller partition, iterate on larger partition */
         if (i - lo < hi - i) {
             quick_sort_internal(base, lo, i - 1, size, compare_func);
@@ -243,14 +243,14 @@ static void quick_sort_internal(void *base, size_t lo, size_t hi, size_t size, s
  * @param  size: Size of each element
  * @param  compare_func: Function to compare elements
  * @retval None
- * 
+ *
  * Merge sort is stable and guarantees O(n log n) time complexity.
  */
 void merge_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t compare_func)
 {
     /* Check for empty or single-element array */
     if (nmemb <= 1) return;
-    
+
     /* Allocate temporary buffer */
     void *temp = malloc(nmemb * size);
     if (!temp) {
@@ -258,9 +258,9 @@ void merge_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t compa
         insertion_sort(base, nmemb, size, compare_func);
         return;
     }
-    
+
     merge_sort_internal(base, temp, 0, nmemb - 1, size, compare_func);
-    
+
     /* Free temporary buffer */
     free(temp);
 }
@@ -279,11 +279,11 @@ static void merge_sort_internal(void *base, void *temp, size_t lo, size_t hi, si
 {
     if (lo < hi) {
         size_t mid = lo + (hi - lo) / 2;
-        
+
         /* Recursively sort both halves */
         merge_sort_internal(base, temp, lo, mid, size, compare_func);
         merge_sort_internal(base, temp, mid + 1, hi, size, compare_func);
-        
+
         /* Merge the sorted halves */
         merge(base, temp, lo, mid, hi, size, compare_func);
     }
@@ -305,15 +305,15 @@ static void merge(void *base, void *temp, size_t lo, size_t mid, size_t hi, size
     uint8_t *p = (uint8_t *)base;
     uint8_t *t = (uint8_t *)temp;
     size_t i, j, k;
-    
+
     /* Copy both parts into the temporary array */
     memcpy(t + (lo * size), p + (lo * size), (hi - lo + 1) * size);
-    
+
     /* Set pointers for merging */
     i = lo;         /* First subarray index */
     j = mid + 1;    /* Second subarray index */
     k = lo;         /* Merged array index */
-    
+
     /* Merge the two parts back into the original array */
     while (i <= mid && j <= hi) {
         if (compare_func(t + (i * size), t + (j * size)) <= 0) {
@@ -325,14 +325,14 @@ static void merge(void *base, void *temp, size_t lo, size_t mid, size_t hi, size
         }
         k++;
     }
-    
+
     /* Copy remaining elements from first subarray, if any */
     while (i <= mid) {
         memcpy(p + (k * size), t + (i * size), size);
         i++;
         k++;
     }
-    
+
     /* No need to copy remaining elements from second subarray
        as they are already in their correct position */
 }
