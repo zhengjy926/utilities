@@ -17,8 +17,8 @@
 /* Private variables ---------------------------------------------------------*/
 /**
  * @brief CRC table for the CRC-16. The poly is 0x8005 (x^16 + x^15 + x^2 + 1)
- *        input data reversed : ture,
- *        output data reversed : ture.
+ *        input data reversed : true,
+ *        output data reversed : true.
  */
 static uint16_t const crc16_8005_table[256] = {
 	0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -57,8 +57,8 @@ static uint16_t const crc16_8005_table[256] = {
 
 /**
  * @brief CRC table for the CRC-16. The poly is 0x1021 (x^16 + x^12 + x^5 + 1),
- *        input data reversed : ture,
- *        output data reversed : ture.
+ *        input data reversed : true,
+ *        output data reversed : true.
  */
 static uint16_t const crc16_1021_reversed_table[256] = {
     0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
