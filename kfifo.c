@@ -26,111 +26,6 @@ static void kfifo_copy_out(kfifo_t *fifo,
                            unsigned int len,
                            unsigned int off);
 
-/* Private functions ---------------------------------------------------------*/
-/**
- * @brief Get the unused space in the FIFO
- * @param fifo Pointer to the FIFO structure
- * @return Number of unused elements in the FIFO
- */
-static inline unsigned int kfifo_unused(const kfifo_t *fifo)
-{
-    return kfifo_size(fifo) - kfifo_len(fifo);
-}
-
-/**
- * @brief Copy data into the FIFO buffer
- * @param fifo Pointer to the FIFO structure
- * @param src  Pointer to the source buffer (elements)
- * @param len  Number of elements to be copied
- * @param off  Offset in the destination buffer (elements)
- * @details This function handles circular buffer wraparound and ensures
- *          data consistency with memory barriers.
- */
-static void kfifo_copy_in(kfifo_t *fifo,
-                          const void *src,
-                          unsigned int len,
-                          unsigned int off)
-{
-    unsigned int size_elems = fifo->mask + 1U;
-    unsigned int esize      = fifo->esize;
-    unsigned int off_bytes;
-    unsigned int size_bytes;
-    unsigned int len_bytes;
-    unsigned int l_bytes;
-    uint8_t     *dst_bytes;
-    const uint8_t *src_bytes;
-
-    off       &= fifo->mask;
-    dst_bytes  = (uint8_t *)fifo->data;
-    src_bytes  = (const uint8_t *)src;
-
-    if (esize != 1U) {
-        off_bytes  = off * esize;
-        size_bytes = size_elems * esize;
-        len_bytes  = len * esize;
-    } else {
-        off_bytes  = off;
-        size_bytes = size_elems;
-        len_bytes  = len;
-    }
-
-    l_bytes = min(len_bytes, size_bytes - off_bytes);
-
-    (void)memcpy(&dst_bytes[off_bytes], src_bytes, (size_t)l_bytes);
-    (void)memcpy(dst_bytes, &src_bytes[l_bytes], (size_t)(len_bytes - l_bytes));
-
-    /* make sure that the data in the fifo is up to date before
-     * incrementing the fifo->in index counter */
-    __DMB();
-}
-
-/**
- * @brief Copy data from the FIFO buffer
- * @param fifo Pointer to the FIFO structure
- * @param dst  Pointer to the destination buffer (elements)
- * @param len  Number of elements to be copied
- * @param off  Offset in the source buffer (elements)
- * @details This function handles circular buffer wraparound and ensures
- *          data consistency with memory barriers.
- */
-static void kfifo_copy_out(kfifo_t *fifo,
-                           void *dst,
-                           unsigned int len,
-                           unsigned int off)
-{
-    unsigned int size_elems = fifo->mask + 1U;
-    unsigned int esize      = fifo->esize;
-    unsigned int off_bytes;
-    unsigned int size_bytes;
-    unsigned int len_bytes;
-    unsigned int l_bytes;
-    uint8_t     *dst_bytes;
-    const uint8_t *src_bytes;
-
-    off       &= fifo->mask;
-    dst_bytes  = (uint8_t *)dst;
-    src_bytes  = (const uint8_t *)fifo->data;
-
-    if (esize != 1U) {
-        off_bytes  = off * esize;
-        size_bytes = size_elems * esize;
-        len_bytes  = len * esize;
-    } else {
-        off_bytes  = off;
-        size_bytes = size_elems;
-        len_bytes  = len;
-    }
-
-    l_bytes = min(len_bytes, size_bytes - off_bytes);
-
-    (void)memcpy(dst_bytes, &src_bytes[off_bytes], (size_t)l_bytes);
-    (void)memcpy(&dst_bytes[l_bytes], src_bytes, (size_t)(len_bytes - l_bytes));
-
-    /* make sure that the data is copied before
-     * incrementing the fifo->out index counter */
-    __DMB();
-}
-
 /* Exported functions --------------------------------------------------------*/
 
 /**
@@ -147,31 +42,21 @@ int kfifo_init(kfifo_t *fifo,
                unsigned int size,
                unsigned int esize)
 {
-    unsigned int elems;
+	size /= esize;
 
-    if ((fifo == NULL) || (buffer == NULL) || (size == 0U) || (esize == 0U)) {
-        return -EINVAL;
-    }
+	if (!is_power_of_2(size))
+		size = rounddown_pow_of_two(size);
 
-    /* convert total bytes -> number of elements */
-    elems = size / esize;
-    if (elems < 2U) {
-        return -EINVAL;
-    }
+	fifo->in = 0;
+	fifo->out = 0;
+	fifo->esize = esize;
+	fifo->data = buffer;
 
-    /* ensure element count is a power of 2 for mask-based index */
-    if (is_power_of_2(elems) == 0U) {
-        elems = rounddown_pow_of_two(elems);
-        if (elems < 2U) {
-            return -EINVAL;
-        }
-    }
-
-    fifo->in    = 0U;
-    fifo->out   = 0U;
-    fifo->esize = esize;
-    fifo->data  = buffer;
-    fifo->mask  = elems - 1U;
+	if (size < 2) {
+		fifo->mask = 0;
+		return -EINVAL;
+	}
+	fifo->mask = size - 1;
 
     return 0;
 }
@@ -185,25 +70,15 @@ int kfifo_init(kfifo_t *fifo,
  */
 unsigned int kfifo_in(kfifo_t *fifo, const void *buf, unsigned int len)
 {
-    unsigned int unused_len;
+	unsigned int l;
 
-    if ((fifo == NULL) || (buf == NULL) || (len == 0U)) {
-        return 0U;
-    }
+	l = kfifo_unused(fifo);
+	if (len > l)
+		len = l;
 
-    unused_len = kfifo_unused(fifo);
-    if (len > unused_len) {
-        len = unused_len;
-    }
-
-    if (len == 0U) {
-        return 0U;
-    }
-
-    kfifo_copy_in(fifo, buf, len, fifo->in);
-    fifo->in += len;
-
-    return len;
+	kfifo_copy_in(fifo, buf, len, fifo->in);
+	fifo->in += len;
+	return len;
 }
 
 /**
@@ -235,24 +110,14 @@ unsigned int kfifo_in_locked(kfifo_t *fifo, const void *buf, unsigned int len)
  */
 unsigned int kfifo_out_peek(kfifo_t *fifo, void *buf, unsigned int len)
 {
-    unsigned int avail;
+	unsigned int l;
 
-    if ((fifo == NULL) || (buf == NULL) || (len == 0U)) {
-        return 0U;
-    }
+	l = fifo->in - fifo->out;
+	if (len > l)
+		len = l;
 
-    avail = fifo->in - fifo->out;
-    if (len > avail) {
-        len = avail;
-    }
-
-    if (len == 0U) {
-        return 0U;
-    }
-
-    kfifo_copy_out(fifo, buf, len, fifo->out);
-
-    return len;
+	kfifo_copy_out(fifo, buf, len, fifo->out);
+	return len;
 }
 
 /**
@@ -269,26 +134,13 @@ unsigned int kfifo_out_linear(kfifo_t *fifo,
                               unsigned int *tail,
                               unsigned int n)
 {
-    unsigned int size;
-    unsigned int off;
-    unsigned int avail;
+	unsigned int size = fifo->mask + 1;
+	unsigned int off = fifo->out & fifo->mask;
 
-    if ((fifo == NULL) || (n == 0U)) {
-        if (tail != NULL) {
-            *tail = 0U;
-        }
-        return 0U;
-    }
+	if (tail)
+		*tail = off;
 
-    size  = fifo->mask + 1U;
-    off   = fifo->out & fifo->mask;
-    avail = fifo->in - fifo->out;
-
-    if (tail != NULL) {
-        *tail = off;
-    }
-
-    return min3(n, avail, size - off);
+	return min3(n, fifo->in - fifo->out, size - off);
 }
 
 /**
@@ -300,18 +152,9 @@ unsigned int kfifo_out_linear(kfifo_t *fifo,
  */
 unsigned int kfifo_out(kfifo_t *fifo, void *buf, unsigned int len)
 {
-    if ((fifo == NULL) || (buf == NULL) || (len == 0U)) {
-        return 0U;
-    }
-
-    len = kfifo_out_peek(fifo, buf, len);
-    if (len == 0U) {
-        return 0U;
-    }
-
-    fifo->out += len;
-
-    return len;
+	len = kfifo_out_peek(fifo, buf, len);
+	fifo->out += len;
+	return len;
 }
 
 /**
@@ -355,6 +198,86 @@ unsigned int kfifo_out_linear_locked(kfifo_t *fifo,
     __set_PRIMASK(primask);
 
     return ret;
+}
+
+/* Private functions ---------------------------------------------------------*/
+
+/**
+ * @brief Get the unused space in the FIFO
+ * @param fifo Pointer to the FIFO structure
+ * @return Number of unused elements in the FIFO
+ */
+static inline unsigned int kfifo_unused(const kfifo_t *fifo)
+{
+	return (fifo->mask + 1) - (fifo->in - fifo->out);
+}
+
+/**
+ * @brief Copy data into the FIFO buffer
+ * @param fifo Pointer to the FIFO structure
+ * @param src  Pointer to the source buffer (elements)
+ * @param len  Number of elements to be copied
+ * @param off  Offset in the destination buffer (elements)
+ * @details This function handles circular buffer wraparound and ensures
+ *          data consistency with memory barriers.
+ */
+static void kfifo_copy_in(kfifo_t *fifo,
+                          const void *src,
+                          unsigned int len,
+                          unsigned int off)
+{
+	unsigned int size = fifo->mask + 1;
+	unsigned int esize = fifo->esize;
+	unsigned int l;
+
+	off &= fifo->mask;
+	if (esize != 1) {
+		off *= esize;
+		size *= esize;
+		len *= esize;
+	}
+	l = min(len, size - off);
+
+	memcpy(fifo->data + off, src, l);
+	memcpy(fifo->data, src + l, len - l);
+
+    /* make sure that the data in the fifo is up to date before
+     * incrementing the fifo->in index counter */
+    __DMB();
+}
+
+/**
+ * @brief Copy data from the FIFO buffer
+ * @param fifo Pointer to the FIFO structure
+ * @param dst  Pointer to the destination buffer (elements)
+ * @param len  Number of elements to be copied
+ * @param off  Offset in the source buffer (elements)
+ * @details This function handles circular buffer wraparound and ensures
+ *          data consistency with memory barriers.
+ */
+static void kfifo_copy_out(kfifo_t *fifo,
+                           void *dst,
+                           unsigned int len,
+                           unsigned int off)
+{
+	unsigned int size = fifo->mask + 1;
+	unsigned int esize = fifo->esize;
+	unsigned int l;
+
+	off &= fifo->mask;
+	if (esize != 1) {
+		off *= esize;
+		size *= esize;
+		len *= esize;
+	}
+	l = min(len, size - off);
+
+	memcpy(dst, fifo->data + off, l);
+	memcpy(dst + l, fifo->data, len - l);
+
+    /* make sure that the data is copied before
+     * incrementing the fifo->out index counter */
+    __DMB();
 }
 
 /**************************** End of file *************************************/

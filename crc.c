@@ -160,13 +160,25 @@ uint16_t crc16_8005(uint16_t      init_value, uint16_t xor_out_value,
                     const uint8_t *buffer,    size_t   len)
 {
     uint16_t crc = init_value;
-
-	while (len--)
-		crc = crc16_8005_byte(crc, *buffer++);
-
+    crc = crc16_8005_update(crc, buffer, len);
     crc ^= xor_out_value;
+    return crc;
+}
 
-	return crc;
+/**
+  * @brief  分段计算 CRC-16 (poly 0x8005) 的中间段
+  *         用于分段数据计算，不应用 xor_out_value
+  * @param  crc    : 当前 CRC 值（第一段使用 init_value，后续段使用上一段的返回值）
+  * @param  buffer : 数据指针
+  * @param  len    : 缓冲区字节数
+  * @retval 返回更新后的 CRC 值（未应用 xor_out_value）
+  */
+uint16_t crc16_8005_update(uint16_t crc, const uint8_t *buffer, size_t len)
+{
+    while (len--) {
+        crc = crc16_8005_byte(crc, *buffer++);
+    }
+    return crc;
 }
 
 /**
@@ -195,21 +207,32 @@ uint16_t crc16_1021(uint16_t init_value, uint16_t xor_out_value, bool reversed,
                     const uint8_t *buffer, size_t len)
 {
     uint16_t crc = init_value;
-
-    if (reversed)
-    {
-        while (len--)
-            crc = crc16_1021_reversed_byte(crc, *buffer++);
-    }
-    else
-    {
-        while (len--)
-            crc = crc16_1021_byte(crc, *buffer++);
-    }
-
+    crc = crc16_1021_update(crc, reversed, buffer, len);
     crc ^= xor_out_value;
+    return crc;
+}
 
-	return crc;
+/**
+  * @brief  分段计算 CRC-16 (poly 0x1021) 的中间段
+  *         用于分段数据计算，不应用 xor_out_value
+  * @param  crc     : 当前 CRC 值（第一段使用 init_value，后续段使用上一段的返回值）
+  * @param  reversed: 是否使用反转模式
+  * @param  buffer  : 数据指针
+  * @param  len     : 缓冲区字节数
+  * @retval 返回更新后的 CRC 值（未应用 xor_out_value）
+  */
+uint16_t crc16_1021_update(uint16_t crc, bool reversed, const uint8_t *buffer, size_t len)
+{
+    if (reversed) {
+        while (len--) {
+            crc = crc16_1021_reversed_byte(crc, *buffer++);
+        }
+    } else {
+        while (len--) {
+            crc = crc16_1021_byte(crc, *buffer++);
+        }
+    }
+    return crc;
 }
 
 /* Private functions ---------------------------------------------------------*/
