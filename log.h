@@ -24,7 +24,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <assert.h>
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -45,7 +44,6 @@ typedef struct {
 } log_handler_t;
 
 /* Exported constants --------------------------------------------------------*/
-
 /**
  * @defgroup 日志级别
  * @{
@@ -54,7 +52,21 @@ typedef struct {
 #define LOG_LVL_WARNING                 1   /**< Warning conditions */
 #define LOG_LVL_INFO                    2   /**< Informational messages */
 #define LOG_LVL_DEBUG                   3   /**< Debug-level messages */
-#define LOG_LVL_ASSERT                  4   /**<  */
+/**
+  * @}
+  */
+
+/**
+ * @defgroup 颜色定义
+ * @{
+ */
+#define LOG_CLR_RESET   "\033[0m"
+#define LOG_CLR_RED     "\033[31m"
+#define LOG_CLR_GREEN   "\033[32m"
+#define LOG_CLR_YELLOW  "\033[33m"
+#define LOG_CLR_BLUE    "\033[34m"
+#define LOG_CLR_MAGENTA "\033[35m"
+#define LOG_CLR_CYAN    "\033[36m"
 /**
   * @}
   */
@@ -79,14 +91,21 @@ typedef struct {
     #define LOG_GLOBAL_LVL              LOG_LVL_DEBUG
 #endif
 
-/* assert for developer. */
 #ifndef LOG_ASSERT_ENABLE
     #define LOG_ASSERT_ENABLE           0
-    #if (LOG_ASSERT_ENABLE == 0)
-        #define NODEBUG
-    #endif
 #endif
 
+#if (LOG_ASSERT_ENABLE == 1)
+    #define LOG_ASSERT(expr) \
+            do { \
+                if (!(expr)) { \
+                    log_output(LOG_LVL_ERROR, LOG_CLR_RED"Wrong parameters value: file %s on line %d\r\n", __FILE__, __LINE__); \
+                    while(1); \
+                } \
+            } while (0)
+#else
+    #define LOG_ASSERT(expr) ((void)0)
+#endif
 /**
   * @}
   */
@@ -115,48 +134,53 @@ typedef struct {
 #endif
 
 #if (LOG_LVL >= LOG_LVL_DEBUG) && (LOG_GLOBAL_LVL >= LOG_LVL_DEBUG)
-    #define LOG_D(fmt, ...)           log_output("[%s][DBG]" fmt, LOG_TAG, ##__VA_ARGS__)
+    #define LOG_D(fmt, ...) log_output(LOG_LVL_DEBUG, LOG_CLR_RESET "[DBG][" LOG_TAG "] " fmt, ##__VA_ARGS__)
 #else
-    #define LOG_D(fmt, ...)
+    #define LOG_D(...)
 #endif
 
 #if (LOG_LVL >= LOG_LVL_INFO) && (LOG_GLOBAL_LVL >= LOG_LVL_INFO)
-    #define LOG_I(fmt, ...)           log_output("[%s][INF]" fmt, LOG_TAG, ##__VA_ARGS__)
+    #define LOG_I(fmt, ...) log_output(LOG_LVL_INFO, LOG_CLR_GREEN "[INF][" LOG_TAG "]" fmt LOG_CLR_RESET, ##__VA_ARGS__)
 #else
-    #define LOG_I(fmt, ...)
+    #define LOG_I(...)
 #endif
 
 #if (LOG_LVL >= LOG_LVL_WARNING) && (LOG_GLOBAL_LVL >= LOG_LVL_WARNING)
-    #define LOG_W(fmt, ...)           log_output("[%s][WARN]" fmt, LOG_TAG, ##__VA_ARGS__)
+    #define LOG_W(fmt, ...) log_output(LOG_LVL_WARNING, LOG_CLR_YELLOW  "[WRN][" LOG_TAG "] " fmt LOG_CLR_RESET, ##__VA_ARGS__)
 #else
-    #define LOG_W(fmt, ...)
+    #define LOG_W(...)
 #endif
 
 #if (LOG_LVL >= LOG_LVL_ERROR) && (LOG_GLOBAL_LVL >= LOG_LVL_ERROR)
-    #define LOG_E(fmt, ...)           log_output("[%s][ERR]" fmt, LOG_TAG, ##__VA_ARGS__)
+    #define LOG_E(fmt, ...) log_output(LOG_LVL_ERROR, LOG_CLR_RED "[ERR][" LOG_TAG "]" fmt LOG_CLR_RESET, ##__VA_ARGS__)
 #else
-    #define LOG_E(fmt, ...)
+    #define LOG_E(...)
 #endif
 
 /* Exported variables --------------------------------------------------------*/
 
 
 /* Exported functions --------------------------------------------------------*/
+/** @addtogroup 初始化和注册函数
+  * @{
+  */
 void log_init(void);
 bool log_register_handler(const char *name, log_output_fn output);
 bool log_unregister_handler(const char *name);
+/**
+  * @}
+  */
+
+
 void log_enable_handler(const char *name);
 void log_disable_handler(const char *name);
 
-/* 运行时全局级别控制 */
 void     log_set_global_level(uint8_t lvl);
 uint8_t  log_get_global_level(void);
 
-/* 基础输出 */
-void log_output(const char *format, ...);
+void log_output(uint8_t level, const char *format, ...);
 void log_voutput(const char *format, va_list ap);
 
-/* 常用工具 */
 void log_hexdump(const char *tag, const void *buf, size_t len);
 
 #ifdef __cplusplus
