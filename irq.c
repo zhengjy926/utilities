@@ -4,7 +4,7 @@
   * @author      : ZJY
   * @version     : V1.0
   * @date        : 20xx-xx-xx
-  * @brief       : 
+  * @brief       :
   * @attention   : None
   ******************************************************************************
   * @history     :
@@ -67,7 +67,7 @@ uint8_t interrupt_get_nest(void)
     __disable_irq();
     ret = atomic_load(&interrupt_nest);
     __enable_irq();
-    
+
     return ret;
 }
 /* Private functions ---------------------------------------------------------*/

@@ -4,7 +4,7 @@
   * @author      : ZJY
   * @version     : V1.0
   * @date        : 20xx-xx-xx
-  * @brief       : 
+  * @brief       :
   * @attention   : None
   ******************************************************************************
   * @history     :
