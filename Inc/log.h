@@ -11,8 +11,8 @@
   *         V1.0 : 1.xxx
   ******************************************************************************
   */
-#ifndef __LOG_H__
-#define __LOG_H__
+#ifndef LOG_H
+#define LOG_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -187,5 +187,5 @@ void log_hexdump(const char *tag, const void *buf, size_t len);
 }
 #endif /* __cplusplus */
 
-#endif /* __LOG_H__ */
+#endif /* LOG_H */
 

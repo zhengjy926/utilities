@@ -8,8 +8,8 @@
   * @attention   : 在此配置RTOS类型和相关参数
   ******************************************************************************
   */
-#ifndef __MUTEX_CONFIG_H__
-#define __MUTEX_CONFIG_H__
+#ifndef MUTEX_CONFIG_H
+#define MUTEX_CONFIG_H
 
 /* ========================================================================== */
 /* RTOS选择配置                                                               */
@@ -93,5 +93,5 @@
     #define MUTEX_ASSERT(expr)
 #endif
 
-#endif /* __MUTEX_CONFIG_H__ */
+#endif /* MUTEX_CONFIG_H */
 

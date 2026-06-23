@@ -1,5 +1,5 @@
-#ifndef __CRC_H
-#define __CRC_H
+#ifndef CRC_H
+#define CRC_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -254,7 +254,7 @@ static inline uint16_t crc16_xmodem_finalize(uint16_t crc)
 }
 #endif /* __cplusplus */
 
-#endif /* __CRC_H */
+#endif /* CRC_H */
 
 
 

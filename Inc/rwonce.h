@@ -1,5 +1,5 @@
-#ifndef __RWONCE_H
-#define __RWONCE_H
+#ifndef RWONCE_H
+#define RWONCE_H
 
 #define READ_ONCE(x) (*(const volatile typeof(x) *)&(x))
 
@@ -8,5 +8,5 @@ do {									    \
 	*(volatile typeof(x) *)&(x) = (val);	\
 } while (0)
 
-#endif //__RWONCE_H
+#endif //RWONCE_H
 

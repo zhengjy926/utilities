@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <cmsis_compiler.h>
 
-#ifndef __LOG2_H__
-#define __LOG2_H__
+#ifndef LOG2_H
+#define LOG2_H
 
 /**
  * is_power_of_2() - check if a value is a power of two
@@ -12,11 +12,21 @@
  * *not* considered a power of two.
  * Return: true if @n is a power of 2, otherwise false.
  */
-static inline __attribute__((const))
-bool is_power_of_2(unsigned int n)
-{
-    return (n != 0 && ((n & (n - 1)) == 0));
-}
+ static inline bool is_power_of_2(uint32_t n)
+ {
+     bool result = false;
+ 
+     if ((n != 0U) && ((n & (n - 1U)) == 0U))
+     {
+         result = true;
+     }
+     else
+     {
+         result = false;
+     }
+ 
+     return result;
+ }
 
 /**
  * __roundup_pow_of_two() - round up to nearest power of two
@@ -54,5 +64,5 @@ unsigned int rounddown_pow_of_two(unsigned int n)
 static inline uint32_t ilog2(uint32_t n) {
     return 31 - __CLZ(n);
 }
-#endif //__LOG2_H__
+#endif //LOG2_H
 

@@ -9,8 +9,8 @@
   ******************************************************************************
   */
 
-#ifndef __SORT_ALGO_H
-#define __SORT_ALGO_H
+#ifndef SORT_ALGO_H
+#define SORT_ALGO_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -79,4 +79,4 @@ void merge_sort(void *base, size_t nmemb, size_t size, sort_compare_func_t compa
 }
 #endif /* __cplusplus */
 
-#endif /* __SORT_ALGO_H */
+#endif /* SORT_ALGO_H */

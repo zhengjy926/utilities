@@ -9,8 +9,8 @@
   ******************************************************************************
   */
 
-#ifndef __MY_LIST_H
-#define __MY_LIST_H
+#ifndef MY_LIST_H
+#define MY_LIST_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -888,5 +888,5 @@ static inline int slist_isempty(slist_t *l)
 #define slist_tail_entry(ptr, type, member) \
     slist_entry(slist_tail(ptr), type, member)
 
-#endif /* __MY_LIST_H */
+#endif /* MY_LIST_H */
 

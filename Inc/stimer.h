@@ -9,8 +9,8 @@
   ******************************************************************************
   */
 
-#ifndef __STIMER_H__
-#define __STIMER_H__
+#ifndef STIMER_H
+#define STIMER_H
 
 #include <stdint.h>
 #ifdef __cplusplus
@@ -66,4 +66,4 @@ void    stimer_service      (void);
 }
 #endif /* __cplusplus */
 
-#endif /* __STIMER_H__ */
+#endif /* STIMER_H */

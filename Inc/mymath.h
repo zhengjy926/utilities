@@ -11,8 +11,8 @@
   *         V1.0 : 添加实现向上取整函数
   ******************************************************************************
   */
-#ifndef __MYMATH_H__
-#define __MYMATH_H__
+#ifndef MYMATH_H
+#define MYMATH_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -50,4 +50,4 @@
 }
 #endif /* __cplusplus */
 
-#endif /* __MYMATH_H__ */
+#endif /* MYMATH_H */

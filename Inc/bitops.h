@@ -1,5 +1,5 @@
-#ifndef __ARM_BITOPS_H__
-#define __ARM_BITOPS_H__
+#ifndef BITOPS_H
+#define BITOPS_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -287,4 +287,4 @@ static inline bool test_and_change_bit32_atomic(uint32_t mask, uint32_t *ptr)
 #ifdef __cplusplus
  }
 #endif /* __cplusplus */
-#endif /* __ARM_BITOPS_H__ */
+#endif /* BITOPS_H */

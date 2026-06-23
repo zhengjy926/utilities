@@ -11,8 +11,8 @@
   *         V1.0 : 1.初始版本,支持裸机、FreeRTOS、RT-Thread
   ******************************************************************************
   */
-#ifndef __KMUTEX_H__
-#define __KMUTEX_H__
+#ifndef KMUTEX_H
+#define KMUTEX_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -279,5 +279,5 @@ void spinlock_unlock(spinlock_t *lock);
 }
 #endif
 
-#endif /* __KMUTEX_H__ */
+#endif /* KMUTEX_H */
 

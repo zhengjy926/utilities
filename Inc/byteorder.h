@@ -15,8 +15,8 @@
   *         V1.0 : 1.Initial version - Basic byte order conversion functions
   ******************************************************************************
   */
-#ifndef __BYTERORDER_H__
-#define __BYTERORDER_H__
+#ifndef BYTERORDER_H
+#define BYTERORDER_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -83,5 +83,5 @@ static inline uint32_t be32_to_cpu(uint32_t val)
 }
 #endif /* __cplusplus */
 
-#endif /* __BYTERORDER_H__ */
+#endif /* BYTERORDER_H */
 

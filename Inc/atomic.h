@@ -11,8 +11,8 @@
   *         V1.0 : 1.xxx
   ******************************************************************************
   */
-#ifndef __ATOMIC_H__
-#define __ATOMIC_H__
+#ifndef ATOMIC_H
+#define ATOMIC_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -79,5 +79,5 @@ atomic_t hw_atomic_compare_exchange_strong(volatile atomic_t *ptr, atomic_t *exp
 }
 #endif /* __cplusplus */
 
-#endif /* __ATOMIC_H__ */
+#endif /* ATOMIC_H */
 
