@@ -83,12 +83,12 @@ typedef struct
 } Kfifo_t;
 
 
-static inline uint32_t Kfifo_Avail(Kfifo_t *fifo)
+static inline uint32_t Kfifo_Avail(const Kfifo_t *fifo)
 {
     return (fifo->mask + 1) - (fifo->in - fifo->out);
 }
 
-static inline uint32_t Kfifo_Len(Kfifo_t *fifo)
+static inline uint32_t Kfifo_Len(const Kfifo_t *fifo)
 {
     return fifo->in - fifo->out;
 }

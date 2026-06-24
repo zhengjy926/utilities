@@ -142,7 +142,7 @@ static uint16_t const crc16_1021_table[256] = {
 /**
  * @brief Using table lookup method to quickly calculate crc values
  */
-static inline uint16_t crc16_8005_byte(uint16_t crc, const uint8_t data)
+static inline uint16_t CRC16_8005_Byte(uint16_t crc, const uint8_t data)
 {
 	return (crc >> 8) ^ crc16_8005_table[(crc ^ data) & 0xff];
 }
@@ -156,11 +156,11 @@ static inline uint16_t crc16_8005_byte(uint16_t crc, const uint8_t data)
   * @param  len          ：number of bytes in the buffer
   * @retval Returns the updated CRC value.
   */
-uint16_t crc16_8005(uint16_t      init_value, uint16_t xor_out_value,
+uint16_t CRC16_8005(uint16_t      init_value, uint16_t xor_out_value,
                     const uint8_t *buffer,    size_t   len)
 {
     uint16_t crc = init_value;
-    crc = crc16_8005_update(crc, buffer, len);
+    crc = CRC16_8005_Update(crc, buffer, len);
     crc ^= xor_out_value;
     return crc;
 }
@@ -173,10 +173,10 @@ uint16_t crc16_8005(uint16_t      init_value, uint16_t xor_out_value,
   * @param  len    : 缓冲区字节数
   * @retval 返回更新后的 CRC 值（未应用 xor_out_value）
   */
-uint16_t crc16_8005_update(uint16_t crc, const uint8_t *buffer, size_t len)
+uint16_t CRC16_8005_Update(uint16_t crc, const uint8_t *buffer, size_t len)
 {
     while (len--) {
-        crc = crc16_8005_byte(crc, *buffer++);
+        crc = CRC16_8005_Byte(crc, *buffer++);
     }
     return crc;
 }
@@ -184,12 +184,12 @@ uint16_t crc16_8005_update(uint16_t crc, const uint8_t *buffer, size_t len)
 /**
  * @brief Using table lookup method to quickly calculate crc values
  */
-static inline uint16_t crc16_1021_reversed_byte(uint16_t crc, const uint8_t data)
+static inline uint16_t CRC16_1021_Reversed_Byte(uint16_t crc, const uint8_t data)
 {
 	return (crc >> 8) ^ crc16_1021_reversed_table[(crc ^ data) & 0xff];
 }
 
-static inline uint16_t crc16_1021_byte(uint16_t crc, const uint8_t data)
+static inline uint16_t CRC16_1021_Byte(uint16_t crc, const uint8_t data)
 {
 	return (crc << 8) ^ crc16_1021_table[((crc >> 8) ^ data) & 0xff];
 }
@@ -203,11 +203,11 @@ static inline uint16_t crc16_1021_byte(uint16_t crc, const uint8_t data)
   * @param  len          ：number of bytes in the buffer
   * @retval Returns the updated CRC value.
   */
-uint16_t crc16_1021(uint16_t init_value, uint16_t xor_out_value, bool reversed,
+uint16_t CRC16_1021(uint16_t init_value, uint16_t xor_out_value, bool reversed,
                     const uint8_t *buffer, size_t len)
 {
     uint16_t crc = init_value;
-    crc = crc16_1021_update(crc, reversed, buffer, len);
+    crc = CRC16_1021_Update(crc, reversed, buffer, len);
     crc ^= xor_out_value;
     return crc;
 }
@@ -221,15 +221,15 @@ uint16_t crc16_1021(uint16_t init_value, uint16_t xor_out_value, bool reversed,
   * @param  len     : 缓冲区字节数
   * @retval 返回更新后的 CRC 值（未应用 xor_out_value）
   */
-uint16_t crc16_1021_update(uint16_t crc, bool reversed, const uint8_t *buffer, size_t len)
+uint16_t CRC16_1021_Update(uint16_t crc, bool reversed, const uint8_t *buffer, size_t len)
 {
     if (reversed) {
         while (len--) {
-            crc = crc16_1021_reversed_byte(crc, *buffer++);
+            crc = CRC16_1021_Reversed_Byte(crc, *buffer++);
         }
     } else {
         while (len--) {
-            crc = crc16_1021_byte(crc, *buffer++);
+            crc = CRC16_1021_Byte(crc, *buffer++);
         }
     }
     return crc;
