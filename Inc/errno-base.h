@@ -33,7 +33,7 @@
 #define	ERR_FBIG		            27	/**< File too large */
 #define	ERR_ENOSPC		            28	/**< No space left on device */
 #define	ERR_ESPIPE		            29	/**< Illegal seek */
-#define	ERR_EROFS		            30	/**< Read-only file system */
+#define	ERR_ROFS		            30	/**< Read-only file system */
 #define	ERR_MLINK		            31	/**< Too many links */
 #define	ERR_PIPE		            32	/**< Broken pipe */
 #define	ERR_DOM		                33	/**< Math argument out of domain of func */
